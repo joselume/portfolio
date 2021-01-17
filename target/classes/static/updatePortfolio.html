@@ -1,0 +1,43 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <head> <title>Portfolio</title> </head>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+        <script src="js/portfolio.js"></script>
+    </head>
+    <body>
+    <br><br>
+        <div class="container border">
+            <h5>Update Profile Form: </h5>
+            <br>
+            <div class="mb-3">
+                <label for="portfolioid" class="form-label">ID: </label>
+                <input type="text" class="form-control" id="portfolioid" name="portfolioid" disabled>
+            </div>
+            <div class="mb-3">
+                <label for="image" class="form-label">Image URL: </label>
+                <input type="text" class="form-control" id="image" image placeholder="Image for the profile">
+            </div>
+            <div class="mb-3">
+                <label for="image" class="form-label">User Name: </label>
+                <input type="text" class="form-control" id="username" class="username" image placeholder="User name">
+            </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Description: </label>
+                <textarea type="text" class="form-control" id="description" class="description" rows="3" image placeholder="Description"></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="title" class="form-label">Title: </label>
+                <input type="text" class="form-control" id="title" class="title" image placeholder="Title">
+            </div>
+            <div class="col-12">
+                <button id="updateBtn" type="submit" class="btn btn-primary">Update Portfolio</button>
+            </div>
+        </div>
+        <script type="text/javascript">
+                renderPortfolioData(false);
+                document.getElementById("updateBtn").onclick = function () { updatePortfolioData(); };
+        </script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
+    </body>
+</html>
