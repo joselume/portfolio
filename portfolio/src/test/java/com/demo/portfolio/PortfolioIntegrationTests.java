@@ -5,6 +5,7 @@ import com.demo.portfolio.model.Portfolio;
 import com.demo.portfolio.repository.PortfolioRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(properties = {
-		"spring.liquibase.enabled=false",
-		"spring.flyway.enabled=false"
-})
+@SpringBootTest
 @AutoConfigureMockMvc
 class PortfolioIntegrationTests {
 	@Autowired
@@ -36,15 +34,23 @@ class PortfolioIntegrationTests {
 	@Autowired
 	private PortfolioRepository portfolioRepository;
 
-	private static final int EXISTING_PORTFOLIO = 987654321;
-	private static final int NON_EXISTING_PORTFOLIO = 123456789;
+	private static final int EXISTING_PORTFOLIO_ID = 987654321;
+
+	private static final int NON_EXISTING_PORTFOLIO_ID = 123456789;
+
+	private Portfolio portfolioObject;
+
+	@BeforeEach
+	private void setUp (){
+		portfolioObject = new Portfolio(EXISTING_PORTFOLIO_ID, "https://pbs.twimg.com/profile_images/668279339838935040/8sUE9d4C_400x400.jpg", "Tyrion Lannister", "Tyrion of House Lannister. Imp, Halfman. Never forget what you are, for surely the world will not. Not affiliated with #GameofThrones or HBO", "GoT_Tyrion");
+		portfolioRepository.save(portfolioObject);
+	}
 
 	@Test
 	void getPortfolioReturnsExistingPortfolio() throws Exception {
-		Portfolio portfolio = savePortfolioToDB();
 
 		MvcResult result =
-				mockMvc.perform(get("/portfolio/{id}", portfolio.getId()))
+				mockMvc.perform(get("/portfolio/{id}", portfolioObject.getId()))
 						.andDo(print())
 						.andExpect(status().isOk())
 						.andReturn();
@@ -53,45 +59,54 @@ class PortfolioIntegrationTests {
 		JSONObject jsonObject = new JSONObject(contentAsString);
 		Portfolio obtainedPortfolio = objectMapper.readValue(jsonObject.getString("portfolio"), Portfolio.class);
 
-		assertThat(obtainedPortfolio.getTitle()).isEqualTo(portfolio.getTitle());
+		assertThat(obtainedPortfolio.getTitle()).isEqualTo(portfolioObject.getTitle());
 	}
 
 	@Test
 	void getNonExistingPortfolioReturnsNotFound() throws Exception {
-		savePortfolioToDB();
+		mockMvc.perform(get("/portfolio/{id}", NON_EXISTING_PORTFOLIO_ID))
+				.andDo(print())
+				.andExpect(status().isNotFound());
+	}
 
-		mockMvc.perform(get("/portfolio/{id}", NON_EXISTING_PORTFOLIO))
+	@Test
+	void getPortfolioWithInvalidTwitterUserReturnsNotFound() throws Exception {
+		portfolioObject.setTwitterUser("nonexistinguser_192837465");
+		portfolioRepository.save(portfolioObject);
+
+		mockMvc.perform(get("/portfolio/{id}", portfolioObject.getId()))
 				.andDo(print())
 				.andExpect(status().isNotFound());
 	}
 
 	@Test
 	void updatePortfolioModifyThePortfolio() throws Exception {
-		Portfolio portfolio = savePortfolioToDB();
-		portfolio.setTitle("updatePortfolioModifyThePortfolio");
+		portfolioObject.setTitle("updatePortfolioModifyThePortfolio");
 
-		mockMvc.perform(put("/portfolio/{id}", portfolio.getId())
+		mockMvc.perform(put("/portfolio/{id}", portfolioObject.getId())
 				.contentType("application/json")
-				.content(objectMapper.writeValueAsString(portfolio)))
+				.content(objectMapper.writeValueAsString(portfolioObject)))
 				.andExpect(status().isOk());
-		Portfolio updatedPortfolio = portfolioRepository.findById(portfolio.getId()).orElseThrow(() -> new NoSuchPortfolioException("There is not portfolio for the given Id"));
+		Portfolio updatedPortfolio = portfolioRepository.findById(portfolioObject.getId()).orElseThrow(() -> new NoSuchPortfolioException("There is not portfolio for the given Id"));
 
 		assertThat(updatedPortfolio.getTitle()).isEqualTo("updatePortfolioModifyThePortfolio");
 	}
 
 	@Test
-	void updateNonExistingPortfolioReturnsNotFound() throws Exception {
-		Portfolio portfolio = savePortfolioToDB();
+	void updatePortfolioWithBlankArgumentsReturnsBadRequest() throws Exception {
+		portfolioObject.setTitle("");
 
-		mockMvc.perform(put("/portfolio/{id}", NON_EXISTING_PORTFOLIO)
+		mockMvc.perform(put("/portfolio/{id}", portfolioObject.getId())
 				.contentType("application/json")
-				.content(objectMapper.writeValueAsString(portfolio)))
-				.andExpect(status().isNotFound());
+				.content(objectMapper.writeValueAsString(portfolioObject)))
+				.andExpect(status().isBadRequest());
 	}
 
-	private Portfolio savePortfolioToDB(){
-		Portfolio portfolio = new Portfolio(EXISTING_PORTFOLIO, "https://pbs.twimg.com/profile_images/668279339838935040/8sUE9d4C_400x400.jpg", "Tyrion Lannister", "Tyrion of House Lannister. Imp, Halfman. Never forget what you are, for surely the world will not. Not affiliated with #GameofThrones or HBO", "GoT_Tyrion");
-		portfolioRepository.save(portfolio);
-		return portfolio;
+	@Test
+	void updateNonExistingPortfolioReturnsNotFound() throws Exception {
+		mockMvc.perform(put("/portfolio/{id}", NON_EXISTING_PORTFOLIO_ID)
+				.contentType("application/json")
+				.content(objectMapper.writeValueAsString(portfolioObject)))
+				.andExpect(status().isNotFound());
 	}
 }

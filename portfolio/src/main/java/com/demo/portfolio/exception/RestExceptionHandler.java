@@ -25,7 +25,7 @@ public class RestExceptionHandler {
                 .map(x->x.getDefaultMessage())
                 .collect(Collectors.joining(", "));
 
-        PortfolioError portfolioError = new PortfolioError(HttpStatus.NOT_FOUND,  "Validation errors: " + description);
+        PortfolioError portfolioError = new PortfolioError(HttpStatus.BAD_REQUEST,  "Validation errors: " + description);
         return buildResponseEntity(portfolioError);
     }
 
