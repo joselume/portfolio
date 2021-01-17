@@ -24,6 +24,8 @@ The application include two endpoints:
 $ mvn spring-boot:run
 ```
 
+Alternatively, the application was deployed in Elastic Beanstalk and the link was provided in the email with my solution.
+
 #### Technologies Used
 The following is a list of the technologies used for developing the application:
 
@@ -36,6 +38,7 @@ The following is a list of the technologies used for developing the application:
 * `[Html]` - Language for structuring the UI content
 * `[Javascript]` - Language for managing the event in the UI
 * `[Bootstrap]` - Framework for styling the UI 
+* `[Elastic Beanstalk]` - AWS Service for de deployment of the application
 
 #### Total time in hours:
 The time spent writing this application: 12 hours.
